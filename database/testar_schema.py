@@ -371,4 +371,696 @@ except sqlite3.IntegrityError as erro:
     print("Erro esperado ao testar status inválido:")
     print(erro)
     
+cursor.execute("""
+    INSERT INTO fatura (
+        cartao_id,
+        mes_referencia,
+        data_fechamento,
+        data_vencimento,
+        status
+    )
+    VALUES (?, ?, ?, ?, ?);
+""", (
+    1,
+    "2026-10",
+    "2026-10-02",
+    "2026-10-10",
+    "ABERTA"
+))
+
+conexao.commit()
+
+print("Fatura válida cadastrada com sucesso.")
+
+cursor.execute("SELECT * FROM fatura;")
+
+print("Faturas cadastradas:")
+
+for fatura in cursor.fetchall():
+    print(fatura)
+    
+try:
+    cursor.execute("""
+        INSERT INTO fatura (
+            cartao_id,
+            mes_referencia,
+            data_fechamento,
+            data_vencimento,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        "999",
+        "2026-11",
+        "2026-11-02",
+        "2026-11-10",
+        "ABERTA"
+    ))
+    
+    conexao.commit()
+    
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado as testar cartão inexistente: ")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO fatura (
+            cartao_id,
+            mes_referencia,
+            data_fechamento,
+            data_vencimento,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        1,
+        "2026-11",
+        "2026-11-02",
+        "2026-11-10",
+        "CANCELADA"
+    ))
+    
+    conexao.commit()
+    
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado as testar STATUS INVALIDO: ")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO fatura (
+            cartao_id,
+            mes_referencia,
+            data_fechamento,
+            data_vencimento,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        1,
+        "2026-11",
+        "2026-11-02",
+        "2026-11-10",
+        "ABERTA"
+    ))
+    
+    conexao.commit()
+    
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado as testar STATUS INVALIDO: ")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO fatura (
+            cartao_id,
+            mes_referencia,
+            data_fechamento,
+            data_vencimento,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        1,
+        "2026-10",
+        "2026-10-03",
+        "2026-10-12",
+        "FECHADA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar fatura duplicada:")
+    print(erro)
+    
+cursor.execute("""
+    INSERT INTO lancamento (
+        tipo,
+        descricao,
+        valor_previsto,
+        data_prevista,
+        categoria_id,
+        status,
+        origem
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?);
+""", (
+    "DESPESA",
+    "Supermercado",
+    25000,
+    "2026-10-05",
+    1,
+    "PENDENTE",
+    "MANUAL"
+))
+
+conexao.commit()
+
+print("Lançamento manual válido cadastrado com sucesso.")
+
+cursor.execute("SELECT * FROM lancamento;")
+
+print("Lançamentos cadastrados:")
+
+for lancamento in cursor.fetchall():
+    print(lancamento)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "OUTRO",
+        "Teste tipo inválido",
+        10000,
+        "2026-10-06",
+        1,
+        "PENDENTE",
+        "MANUAL"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar tipo inválido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste valor inválido",
+        0,
+        "2026-10-06",
+        1,
+        "PENDENTE",
+        "MANUAL"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar valor inválido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste status inválido",
+        10000,
+        "2026-10-06",
+        1,
+        "PAGO",
+        "MANUAL"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar status inválido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste origem inválida",
+        10000,
+        "2026-10-06",
+        1,
+        "PENDENTE",
+        "OUTRA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar origem inválida:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste origem inválida",
+        10000,
+        "2026-10-06",
+        "999",
+        "PENDENTE",
+        "MANUAL"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar origem inválida:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste origem inválida",
+        10000,
+        "2026-10-06",
+        None,
+        "PENDENTE",
+        "MANUAL"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar origem inválida:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste fatura válida",
+        10000,
+        "2026-10-06",
+        None,
+        "PENDENTE",
+        "FATURA"
+    ))
+
+    conexao.commit()
+
+    print("Lançamento de fatura válido cadastrado com sucesso.")
+
+except sqlite3.IntegrityError as erro:
+    print("Erro inesperado ao cadastrar lançamento de fatura válido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            fatura_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste fatura sem vínculo",
+        10000,
+        "2026-10-10",
+        None,
+        None,
+        "PENDENTE",
+        "FATURA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar fatura sem fatura_id:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            fatura_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Fatura Nubank Outubro",
+        10000,
+        "2026-10-10",
+        None,
+        1,
+        "PENDENTE",
+        "FATURA"
+    ))
+
+    conexao.commit()
+
+    print("Lançamento de fatura válido cadastrado com sucesso.")
+
+except sqlite3.IntegrityError as erro:
+    print("Erro inesperado ao cadastrar lançamento de fatura válido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            recorrencia_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste recorrência sem vínculo",
+        18300,
+        "2026-11-10",
+        1,
+        None,
+        "PENDENTE",
+        "RECORRENCIA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar recorrência sem recorrencia_id:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            recorrencia_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Internet Novembro",
+        18300,
+        "2026-11-10",
+        1,
+        1,
+        "PENDENTE",
+        "RECORRENCIA"
+    ))
+
+    conexao.commit()
+
+    print("Lançamento de recorrência válido cadastrado com sucesso.")
+
+except sqlite3.IntegrityError as erro:
+    print("Erro inesperado ao cadastrar lançamento de recorrência válido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            recorrencia_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste recorrência inexistente",
+        18300,
+        "2026-11-10",
+        1,
+        999,
+        "PENDENTE",
+        "RECORRENCIA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar recorrencia_id inexistente:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            fatura_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Teste fatura inexistente",
+        10000,
+        "2026-10-10",
+        None,
+        999,
+        "PENDENTE",
+        "FATURA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar fatura_id inexistente:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO lancamento (
+            tipo,
+            descricao,
+            valor_previsto,
+            data_prevista,
+            categoria_id,
+            fatura_id,
+            status,
+            origem
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    """, (
+        "DESPESA",
+        "Segunda tentativa da mesma fatura",
+        10000,
+        "2026-10-10",
+        None,
+        1,
+        "PENDENTE",
+        "FATURA"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar fatura duplicada em lançamento:")
+    print(erro)
+    
+cursor.execute("""
+    INSERT INTO movimentacao (
+        lancamento_id,
+        valor,
+        data_movimentacao,
+        forma,
+        observacao
+    )
+    VALUES (?, ?, ?, ?, ?);
+""", (
+    1,
+    25000,
+    "2026-10-05",
+    "PIX",
+    "Pagamento do supermercado"
+))
+
+conexao.commit()
+
+print("Movimentação válida cadastrada com sucesso.")
+
+cursor.execute("SELECT * FROM movimentacao;")
+
+print("Movimentações cadastradas:")
+
+for movimentacao in cursor.fetchall():
+    print(movimentacao)
+    
+try:
+    cursor.execute("""
+        INSERT INTO movimentacao (
+            lancamento_id,
+            valor,
+            data_movimentacao,
+            forma,
+            observacao
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        2,
+        0,
+        "2026-10-06",
+        "PIX",
+        "Teste valor inválido"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar valor inválido:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO movimentacao (
+            lancamento_id,
+            valor,
+            data_movimentacao,
+            forma,
+            observacao
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        2,
+        10000,
+        "2026-10-06",
+        "CHEQUE",
+        "Teste forma inválida"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar forma inválida:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO movimentacao (
+            lancamento_id,
+            valor,
+            data_movimentacao,
+            forma,
+            observacao
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        999,
+        10000,
+        "2026-10-06",
+        "PIX",
+        "Teste lançamento inexistente"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar lançamento inexistente:")
+    print(erro)
+    
+try:
+    cursor.execute("""
+        INSERT INTO movimentacao (
+            lancamento_id,
+            valor,
+            data_movimentacao,
+            forma,
+            observacao
+        )
+        VALUES (?, ?, ?, ?, ?);
+    """, (
+        1,
+        25000,
+        "2026-10-07",
+        "DINHEIRO",
+        "Segunda movimentação do mesmo lançamento"
+    ))
+
+    conexao.commit()
+
+except sqlite3.IntegrityError as erro:
+    print("Erro esperado ao testar movimentação duplicada:")
+    print(erro)
+        
 conexao.close()

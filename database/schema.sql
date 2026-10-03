@@ -62,3 +62,141 @@ CREATE TABLE IF NOT EXISTS recorrencia (
         ON DELETE RESTRICT
         ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS fatura (
+    id INTEGER PRIMARY KEY,
+    cartao_id INTEGER NOT NULL,
+    mes_referencia TEXT NOT NULL,
+    data_fechamento TEXT NOT NULL,
+    data_vencimento TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'ABERTA',
+
+    CHECK (status IN ('ABERTA', 'FECHADA')),
+
+    UNIQUE (cartao_id, mes_referencia),
+
+    FOREIGN KEY (cartao_id)
+        REFERENCES cartao(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS lancamento (
+    id INTEGER PRIMARY KEY,
+    tipo TEXT NOT NULL,
+    descricao TEXT NOT NULL,
+    valor_previsto INTEGER NOT NULL,
+    data_prevista TEXT NOT NULL,
+    categoria_id INTEGER,
+    recorrencia_id INTEGER,
+    fatura_id INTEGER,
+    status TEXT NOT NULL DEFAULT 'PENDENTE',
+    observacao TEXT,
+    origem TEXT NOT NULL DEFAULT 'MANUAL',
+
+    CHECK (tipo IN ('RECEITA', 'DESPESA')),
+    CHECK (valor_previsto > 0),
+    CHECK (status IN ('PENDENTE', 'EFETIVADO', 'CANCELADO')),
+    CHECK (origem IN ('MANUAL', 'RECORRENCIA', 'FATURA')),
+
+    CHECK (
+        origem = 'FATURA'
+        OR categoria_id IS NOT NULL
+    ),
+
+    CHECK (
+        origem != 'FATURA'
+        OR fatura_id IS NOT NULL
+    ),
+
+    CHECK (
+    origem != 'RECORRENCIA'
+    OR recorrencia_id IS NOT NULL
+    ),
+
+    FOREIGN KEY (categoria_id)
+        REFERENCES categoria(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (recorrencia_id)
+        REFERENCES recorrencia(id)
+        ON DELETE RESTRICT
+        ON DELETE CASCADE,
+
+    FOREIGN KEY (fatura_id)
+        REFERENCES fatura(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+
+    UNIQUE (fatura_id)
+);
+
+CREATE TABLE IF NOT EXISTS movimentacao (
+    id INTEGER PRIMARY KEY,
+    lancamento_id INTEGER NOT NULL,
+    valor INTEGER NOT NULL,
+    data_movimentacao TEXT NOT NULL,
+    forma TEXT NOT NULL,
+    observacao TEXT,
+
+    CHECK (valor > 0),
+
+    CHECK (
+        forma IN (
+            'PIX',
+            'DINHEIRO',
+            'DEBITO',
+            'TRANSFERENCIA',
+            'BOLETO',
+            'OUTRO'
+        )
+    ),
+
+    UNIQUE (lancamento_id),
+
+    FOREIGN KEY (lancamento_id)
+        REFERENCES lancamento(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS compra_cartao (
+    id INTEGER PRIMARY KEY,
+    cartao_id INTEGER NOT NULL,
+    categoria_id INTEGER NOT NULL,
+    recorrencia_id INTEGER,
+    descricao TEXT NOT NULL,
+    data_compra TEXT NOT NULL,
+    valor_total INTEGER NOT NULL,
+    quantidade_parcelas INTEGER NOT NULL,
+    primeira_parcela_controlada INTEGER NOT NULL DEFAULT 0,
+    data_primeira_parcela_controlada TEXT,
+    status TEXT NOT NULL DEFAULT 'ATIVA',
+    observacao TEXT,
+
+    CHECK (valor_total > 0),
+    CHECK (quantidade_parcelas >0),
+    CHECK (primeira_parcela_controlada IN (0, 1)),
+    CHECK (status IN ('ATIVA', 'CANCELADA')),
+
+    CHECK (
+        primeira_parcela_controlada = 0
+        OR data_primeira_parcela_controlada IS NOT NULL
+    ),
+
+    FOREIGN KEY (cartao_id)
+        REFERENCES cartao(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (categoria_id)
+        REFERENCES categoria(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE,
+
+    FOREIGN KEY (recorrencia_id)
+        REFERENCES recorrencia(id)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+);
