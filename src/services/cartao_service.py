@@ -27,6 +27,9 @@ def cadastrar_cartao(
 
     if limite_total < 0:
         raise ValueError("O limite total não pode ser negativo.")
+    
+    if not 1 <= dia_fechamento <= 31:
+        raise ValueError("O dia de fechamento deve estar entre 1 e 31.")
 
     if not 1 <= dia_vencimento <= 31:
         raise ValueError("O dia de vencimento deve estar entre 1 e 31.")

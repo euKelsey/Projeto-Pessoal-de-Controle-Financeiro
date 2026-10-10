@@ -1,16 +1,18 @@
 from database.conexao import inicializar_banco
-from repositories.cartao_repository import buscar_por_id, atualizar
+from services.lancamento_service import atualizar_lancamento
 
 
 inicializar_banco()
 
-cartao = buscar_por_id(1)
+lancamento = atualizar_lancamento(
+    lancamento_id=1,
+    tipo="despesa",
+    descricao="Conta de luz atualizada",
+    valor_previsto=22000,
+    data_prevista="2026-10-18",
+    categoria_id=1,
+    status="pendente",
+    observacao="Valor e data atualizados"
+)
 
-cartao.limite_total = 600000
-cartao.observacao = "Limite atualizado"
-cartao.status = "ATIVO"
-atualizar(cartao)
-
-cartao_atualizado = atualizar(cartao)
-
-print(cartao_atualizado)
+print(lancamento)
