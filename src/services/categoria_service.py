@@ -49,25 +49,45 @@ def atualizar_categoria(
     status: str = "ATIVA"
 ):
     categoria = buscar_por_id(categoria_id)
-    
+
     if categoria is None:
         raise ValueError("Categoria não encontrada.")
-    
+
     nome = nome.strip()
     tipo = tipo.strip().upper()
     status = status.strip().upper()
-    
+
     if not nome:
-        raise ValueError("O nome da categoria é obrigatorio.")
-    
+        raise ValueError("O nome da categoria é obrigatório.")
+
     if tipo not in ("RECEITA", "DESPESA"):
-        raise ValueError("O status deve ser ATIVA ou INATIVA.")
-    
+        raise ValueError(
+            "O tipo da categoria deve ser RECEITA ou DESPESA."
+        )
+
+    if status not in ("ATIVA", "INATIVA"):
+        raise ValueError(
+            "O status deve ser ATIVA ou INATIVA."
+        )
+
+    categoria_existente = buscar_por_nome_tipo(
+        nome,
+        tipo
+    )
+
+    if (
+        categoria_existente is not None
+        and categoria_existente.id != categoria_id
+    ):
+        raise ValueError(
+            "Já existe uma categoria com esse nome e tipo."
+        )
+
     categoria.nome = nome
-    categoria.tipo = tipo 
-    categoria.descricao = descricao 
-    categoria.status = status 
-    
+    categoria.tipo = tipo
+    categoria.descricao = descricao
+    categoria.status = status
+
     return atualizar(categoria)
 
 def inativar_categoria(categoria_id: int):

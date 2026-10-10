@@ -96,28 +96,36 @@ def buscar_por_id(categoria_id: int):
 
 def atualizar(categoria: Categoria):
     conexao = conectar()
-    cursor = conexao.cursor()
-    
-    cursor.execute("""
-        UPDATE categoria
-        SET
-            nome =?,
-            tipo = ?,
-            descricao = ?,
-            status = ?
-        WHERE id = ?;
-    """, (
-        categoria.nome,
-        categoria.tipo,
-        categoria.descricao,
-        categoria.status,
-        categoria.id
-    ))
-    
-    conexao.commit()
-    conexao.close()
-    
-    return categoria
+
+    try:
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            UPDATE categoria
+            SET
+                nome = ?,
+                tipo = ?,
+                descricao = ?,
+                status = ?
+            WHERE id = ?;
+        """, (
+            categoria.nome,
+            categoria.tipo,
+            categoria.descricao,
+            categoria.status,
+            categoria.id
+        ))
+
+        conexao.commit()
+
+        return categoria
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        conexao.close()
 
 def inativar(categoria_id: int):
     conexao = conectar()
