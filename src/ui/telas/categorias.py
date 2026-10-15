@@ -118,6 +118,10 @@ class TelaCategorias(ctk.CTkFrame):
         janela.title("Nova Categoria")
         janela.geometry("400x420")
 
+        janela.transient(self)
+        janela.grab_set()
+        janela.focus_force()
+
         titulo = ctk.CTkLabel(
             janela,
             text="Cadastrar Categoria",
@@ -166,7 +170,7 @@ class TelaCategorias(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
-        
+
         mensagem_erro = ctk.CTkLabel(
             janela,
             text=""
@@ -230,6 +234,10 @@ class TelaCategorias(ctk.CTkFrame):
 
         janela.title("Editar Categoria")
         janela.geometry("400x460")
+
+        janela.transient(self)
+        janela.grab_set()
+        janela.focus_force()
 
         titulo = ctk.CTkLabel(
             janela,

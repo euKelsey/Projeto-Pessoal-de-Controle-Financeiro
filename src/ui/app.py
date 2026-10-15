@@ -1,4 +1,7 @@
 import customtkinter as ctk
+from ui.telas.lancamentos import TelaLancamentos
+
+from ui.telas.cartoes import TelaCartoes
 
 from ui.telas.categorias import TelaCategorias
 
@@ -66,7 +69,8 @@ class App(ctk.CTk):
 
         self.botao_lancamentos = ctk.CTkButton(
             self.menu_lateral,
-            text="Lançamentos"
+            text="Lançamentos",
+            command=self.mostrar_lancamentos
         )
 
         self.botao_lancamentos.pack(
@@ -77,7 +81,8 @@ class App(ctk.CTk):
 
         self.botao_cartoes = ctk.CTkButton(
             self.menu_lateral,
-            text="Cartões"
+            text="Cartões",
+            command=self.mostrar_cartoes
         )
 
         self.botao_cartoes.pack(
@@ -132,6 +137,31 @@ class App(ctk.CTk):
         self.limpar_area_principal()
 
         tela = TelaCategorias(self.area_principal)
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+    def mostrar_lancamentos(self):
+        self.limpar_area_principal()
+
+        tela = TelaLancamentos(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+
+    def mostrar_cartoes(self):
+        self.limpar_area_principal()
+
+        tela = TelaCartoes(
+            self.area_principal
+        )
 
         tela.pack(
             fill="both",
