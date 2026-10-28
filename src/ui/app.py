@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from ui.telas.lancamentos import TelaLancamentos
+from ui.telas.faturas import TelaFaturas
 
 from ui.telas.cartoes import TelaCartoes
 
@@ -105,7 +106,8 @@ class App(ctk.CTk):
 
         self.botao_faturas = ctk.CTkButton(
             self.menu_lateral,
-            text="Faturas"
+            text="Faturas",
+            command=self.mostrar_faturas
         )
 
         self.botao_faturas.pack(
@@ -155,11 +157,23 @@ class App(ctk.CTk):
             expand=True
         )
 
-
     def mostrar_cartoes(self):
         self.limpar_area_principal()
 
         tela = TelaCartoes(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+
+    def mostrar_faturas(self):
+        self.limpar_area_principal()
+
+        tela = TelaFaturas(
             self.area_principal
         )
 

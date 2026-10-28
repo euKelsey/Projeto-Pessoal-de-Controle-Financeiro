@@ -116,3 +116,13 @@ def inativar_cartao(cartao_id: int):
     inativar(cartao_id)
 
     return buscar_por_id(cartao_id)
+
+def reativar_cartao(cartao_id: int):
+    cartao = buscar_por_id(cartao_id)
+
+    if cartao is None:
+        raise ValueError("Cartão não encontrado.")
+
+    cartao.status = "ATIVO"
+
+    return atualizar(cartao)
