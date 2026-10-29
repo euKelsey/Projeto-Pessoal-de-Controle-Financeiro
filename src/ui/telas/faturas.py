@@ -2,7 +2,8 @@ import customtkinter as ctk
 
 from services.fatura_service import (
     listar_faturas,
-    cadastrar_fatura
+    cadastrar_fatura,
+    atualizar_fatura
 )
 
 from services.cartao_service import listar_cartoes
@@ -93,10 +94,39 @@ class TelaFaturas(ctk.CTkFrame):
             )
 
             label.pack(
+                side="left",
                 padx=10,
                 pady=10,
-                fill="x"
+                fill="x",
+                expand=True
             )
+            
+            botao_editar = ctk.CTkButton(
+                linha,
+                text="Editar",
+                width=80,
+                command=lambda f=fatura: self.abrir_edicao_fatura(f)
+            )
+
+            botao_editar.pack(
+                side="right",
+                padx=5,
+                pady=10
+            )
+            
+            if fatura.status == "ABERTA":
+                botao_editar = ctk.CTkButton(
+                    linha,
+                    text="Editar",
+                    width=80,
+                    command=lambda f=fatura: self.abrir_edicao_fatura(f)
+                )
+
+                botao_editar.pack(
+                    side="right",
+                    padx=5,
+                    pady=10
+                )
 
     def abrir_formulario_fatura(self):
         janela = ctk.CTkToplevel(self)
@@ -253,3 +283,131 @@ class TelaFaturas(ctk.CTkFrame):
             widget.destroy()
 
         self.carregar_faturas()
+        
+    def abrir_edicao_fatura(self, fatura):
+        janela = ctk.CTkToplevel(self)
+
+        janela.title("Editar Fatura")
+        janela.geometry("450x500")
+
+        janela.transient(self)
+        janela.grab_set()
+        janela.focus_force()
+        titulo = ctk.CTkLabel(
+            janela,
+            text="Editar Fatura",
+            font=ctk.CTkFont(
+                size=22,
+                weight="bold"
+            )
+        )
+
+        titulo.pack(
+            pady=(30, 20)
+        )
+        entrada_mes = ctk.CTkEntry(
+            janela
+        )
+
+        entrada_mes.insert(
+            0,
+            fatura.mes_referencia
+        )
+
+        entrada_mes.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        entrada_fechamento = ctk.CTkEntry(
+            janela
+        )
+
+        entrada_fechamento.insert(
+            0,
+            fatura.data_fechamento
+        )
+
+        entrada_fechamento.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+
+        entrada_vencimento = ctk.CTkEntry(
+            janela
+        )
+
+        entrada_vencimento.insert(
+            0,
+            fatura.data_vencimento
+        )
+
+        entrada_vencimento.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        campo_status = ctk.CTkComboBox(
+            janela,
+            values=[
+                "ABERTA",
+                "FECHADA"
+            ],
+            state="readonly"
+        )
+
+        campo_status.set(
+            fatura.status
+        )
+
+        campo_status.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        mensagem_erro = ctk.CTkLabel(
+            janela,
+            text="",
+            text_color="#FF6B6B",
+            wraplength=380
+        )
+
+        mensagem_erro.pack(
+            padx=30,
+            pady=(5, 0)
+        )
+        def salvar_edicao():
+            mes_referencia = entrada_mes.get()
+            data_fechamento = entrada_fechamento.get()
+            data_vencimento = entrada_vencimento.get()
+            status = campo_status.get()
+
+            try:
+                atualizar_fatura(
+                    fatura_id=fatura.id,
+                    mes_referencia=mes_referencia,
+                    data_fechamento=data_fechamento,
+                    data_vencimento=data_vencimento,
+                    status=status
+                )
+
+                janela.destroy()
+
+                self.atualizar_lista()
+
+            except ValueError as erro:
+                mensagem_erro.configure(
+                    text=str(erro)
+                )
+        botao_salvar = ctk.CTkButton(
+            janela,
+            text="Salvar Alterações",
+            command=salvar_edicao
+        )
+
+        botao_salvar.pack(
+            padx=30,
+            pady=20,
+            fill="x"
+        )

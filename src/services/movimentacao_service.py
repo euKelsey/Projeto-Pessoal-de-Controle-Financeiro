@@ -9,7 +9,8 @@ from repositories.movimentacao_repository import (
     listar,
     buscar_por_id,
     buscar_por_lancamento_id,
-    atualizar
+    atualizar,
+    inserir_e_efetivar
 )
 from repositories.lancamento_repository import buscar_por_id as buscar_lancamento_por_id
 
@@ -27,6 +28,11 @@ def cadastrar_movimentacao(
 
     if lancamento is None:
         raise ValueError("Lançamento não encontrado.")
+    
+    if lancamento.status != "PENDENTE":
+        raise ValueError(
+            "Somente lançamentos pendentes podem ser efetivados."
+        )
 
     if valor <= 0:
         raise ValueError("O valor da movimentação deve ser maior que zero.")
@@ -57,12 +63,7 @@ def cadastrar_movimentacao(
         observacao=observacao
     )
 
-    movimentacao_salva = inserir(movimentacao)
-
-    lancamento.status = "EFETIVADO"
-    atualizar_lancamento(lancamento)
-
-    return movimentacao_salva
+    return inserir_e_efetivar(movimentacao)
 
 def listar_movimentacoes():
     return listar()

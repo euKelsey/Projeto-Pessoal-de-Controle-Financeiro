@@ -7,6 +7,8 @@ from services.lancamento_service import (
     atualizar_lancamento
 )
 
+from services.movimentacao_service import cadastrar_movimentacao
+
 from services.categoria_service import listar_categorias_ativas
 
 
@@ -77,7 +79,8 @@ class TelaLancamentos(ctk.CTkFrame):
             texto = (
                 f"{lancamento.descricao} | "
                 f"{lancamento.tipo} | "
-                f"R$ {lancamento.valor_previsto / 100:.2f}".replace(".", ",") + " | "
+                f"R$ {lancamento.valor_previsto / 100:.2f}".replace(
+                    ".", ",") + " | "
                 f"{lancamento.data_prevista} | "
                 f"{lancamento.status}"
             )
@@ -101,7 +104,27 @@ class TelaLancamentos(ctk.CTkFrame):
                     linha,
                     text="Editar",
                     width=80,
-                    command=lambda l=lancamento: self.abrir_edicao_lancamento(l)
+                    command=lambda l=lancamento: self.abrir_edicao_lancamento(
+                        l)
+                )
+                
+                texto_botao = (
+                    "Receber"
+                    if lancamento.tipo == "RECEITA"
+                    else "Pagar"
+                )
+
+                botao_efetivar = ctk.CTkButton(
+                    linha,
+                    text=texto_botao,
+                    width=80,
+                    command=lambda l=lancamento: self.abrir_movimentacao(l)
+                )
+
+                botao_efetivar.pack(
+                    side="right",
+                    padx=5,
+                    pady=10
                 )
 
                 botao_editar.pack(
@@ -114,7 +137,8 @@ class TelaLancamentos(ctk.CTkFrame):
                     linha,
                     text="Cancelar",
                     width=90,
-                    command=lambda l=lancamento: self.cancelar_lancamento_interface(l)
+                    command=lambda l=lancamento: self.cancelar_lancamento_interface(
+                        l)
                 )
 
                 botao_cancelar.pack(
@@ -510,7 +534,7 @@ class TelaLancamentos(ctk.CTkFrame):
             padx=30,
             pady=(5, 0)
         )
-        
+
         def salvar_edicao():
             descricao = entrada_descricao.get()
             tipo = campo_tipo.get()
@@ -564,7 +588,7 @@ class TelaLancamentos(ctk.CTkFrame):
                 mensagem_erro.configure(
                     text=str(erro)
                 )
-                
+
         botao_salvar = ctk.CTkButton(
             janela,
             text="Salvar Alterações",
@@ -572,6 +596,144 @@ class TelaLancamentos(ctk.CTkFrame):
         )
 
         botao_salvar.pack(
+            padx=30,
+            pady=20,
+            fill="x"
+        )
+        
+    def abrir_movimentacao(self, lancamento):
+        janela = ctk.CTkToplevel(self)
+
+        janela.title("Registrar Movimentação")
+        janela.geometry("450x500")
+
+        janela.transient(self)
+        janela.grab_set()
+        janela.focus_force()
+        titulo = ctk.CTkLabel(
+            janela,
+            text=(
+                "Registrar Recebimento"
+                if lancamento.tipo == "RECEITA"
+                else "Registrar Pagamento"
+            ),
+            font=ctk.CTkFont(
+                size=22,
+                weight="bold"
+            )
+        )
+
+        titulo.pack(
+            pady=(30, 20)
+        )
+        entrada_valor = ctk.CTkEntry(
+            janela,
+            placeholder_text="Valor pago ou recebido"
+        )
+
+        entrada_valor.insert(
+            0,
+            f"{lancamento.valor_previsto / 100:.2f}".replace(".", ",")
+        )
+
+        entrada_valor.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        entrada_data = ctk.CTkEntry(
+            janela,
+            placeholder_text="Data: AAAA-MM-DD"
+        )
+
+        entrada_data.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        campo_forma = ctk.CTkComboBox(
+            janela,
+            values=[
+                "PIX",
+                "DINHEIRO",
+                "DEBITO",
+                "TRANSFERENCIA",
+                "BOLETO",
+                "OUTRO"
+            ],
+            state="readonly"
+        )
+
+        campo_forma.set("PIX")
+
+        campo_forma.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+        entrada_observacao = ctk.CTkEntry(
+            janela,
+            placeholder_text="Observação (opcional)"
+        )
+
+        entrada_observacao.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+
+        mensagem_erro = ctk.CTkLabel(
+            janela,
+            text="",
+            text_color="#FF6B6B",
+            wraplength=380
+        )
+
+        mensagem_erro.pack(
+            padx=30,
+            pady=(5, 0)
+        )
+        def confirmar_movimentacao():
+            valor_texto = entrada_valor.get()
+            data = entrada_data.get()
+            forma = campo_forma.get()
+            observacao = entrada_observacao.get()
+
+            try:
+                valor_reais = float(
+                    valor_texto.replace(",", ".")
+                )
+
+                valor_centavos = int(
+                    round(valor_reais * 100)
+                )
+
+                cadastrar_movimentacao(
+                    lancamento_id=lancamento.id,
+                    valor=valor_centavos,
+                    data_movimentacao=data,
+                    forma=forma,
+                    observacao=observacao
+                )
+
+                janela.destroy()
+                self.atualizar_lista()
+
+            except ValueError as erro:
+                mensagem_erro.configure(
+                    text=str(erro)
+                )
+        botao_confirmar = ctk.CTkButton(
+            janela,
+            text=(
+                "Confirmar Recebimento"
+                if lancamento.tipo == "RECEITA"
+                else "Confirmar Pagamento"
+            ),
+            command=confirmar_movimentacao
+        )
+
+        botao_confirmar.pack(
             padx=30,
             pady=20,
             fill="x"

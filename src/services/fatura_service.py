@@ -1,4 +1,5 @@
 from models.fatura import Fatura
+from datetime import datetime
 from repositories.fatura_repository import (
     inserir,
     listar,
@@ -8,12 +9,50 @@ from repositories.fatura_repository import (
 )
 from repositories.cartao_repository import buscar_por_id as buscar_cartao_por_id
 
+def validar_datas_fatura(
+    mes_referencia: str,
+    data_fechamento: str,
+    data_vencimento: str
+):
+    try:
+        datetime.strptime(
+            mes_referencia,
+            "%Y-%m"
+        )
+
+        fechamento = datetime.strptime(
+            data_fechamento,
+            "%Y-%m-%d"
+        )
+
+        vencimento = datetime.strptime(
+            data_vencimento,
+            "%Y-%m-%d"
+        )
+
+    except ValueError:
+        raise ValueError(
+            "Informe datas válidas nos formatos AAAA-MM e AAAA-MM-DD."
+        )
+
+    if fechamento > vencimento:
+        raise ValueError(
+            "A data de fechamento não pode ser posterior ao vencimento."
+        )
+
 def cadastrar_fatura(
     cartao_id: int,
     mes_referencia: str,
     data_fechamento: str,
     data_vencimento: str
 ):
+    
+    validar_datas_fatura(
+        mes_referencia,
+        data_fechamento,
+        data_vencimento
+    )
+    
     cartao = buscar_cartao_por_id(cartao_id)
 
     if cartao is None:
@@ -61,6 +100,17 @@ def atualizar_fatura(
 
     if fatura is None:
         raise ValueError("Fatura não encontrada.")
+    
+    if fatura.status == "FECHADA":
+        raise ValueError(
+            "Esta fatura está fechada e não pode ser editada."
+        )
+    
+    validar_datas_fatura(
+        mes_referencia,
+        data_fechamento,
+        data_vencimento
+    )
 
     status = status.strip().upper()
 

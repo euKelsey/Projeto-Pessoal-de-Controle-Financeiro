@@ -156,3 +156,53 @@ def buscar_por_lancamento_id(lancamento_id: int):
         forma=registro[4],
         observacao=registro[5]
     )
+    
+def inserir_e_efetivar(movimentacao: Movimentacao):
+    conexao = conectar()
+
+    try:
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            INSERT INTO movimentacao (
+                lancamento_id,
+                valor,
+                data_movimentacao,
+                forma,
+                observacao
+            )
+            VALUES (?, ?, ?, ?, ?);
+        """, (
+            movimentacao.lancamento_id,
+            movimentacao.valor,
+            movimentacao.data_movimentacao,
+            movimentacao.forma,
+            movimentacao.observacao
+        ))
+
+        movimentacao.id = cursor.lastrowid
+
+        cursor.execute("""
+            UPDATE lancamento
+            SET status = 'EFETIVADO'
+            WHERE id = ?
+              AND status = 'PENDENTE';
+        """, (
+            movimentacao.lancamento_id,
+        ))
+
+        if cursor.rowcount != 1:
+            raise ValueError(
+                "O lançamento não está pendente."
+            )
+
+        conexao.commit()
+
+        return movimentacao
+
+    except Exception:
+        conexao.rollback()
+        raise
+
+    finally:
+        conexao.close()
