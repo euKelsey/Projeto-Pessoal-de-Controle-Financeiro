@@ -1,5 +1,8 @@
 from database.conexao import conectar
 from models.compra_cartao import CompraCartao
+from datetime import date
+
+
 def inserir(compra: CompraCartao):
     conexao = conectar()
 
@@ -47,7 +50,8 @@ def inserir(compra: CompraCartao):
 
     finally:
         conexao.close()
-        
+
+
 def listar():
     conexao = conectar()
 
@@ -97,7 +101,8 @@ def listar():
 
     finally:
         conexao.close()
-        
+
+
 def buscar_por_id(compra_id: int):
     conexao = conectar()
 
@@ -156,12 +161,12 @@ def inserir_compra_com_parcela(
 
     try:
         cursor = conexao.cursor()
-        
+
         cursor.execute("""
-            SELECT id, status
+            SELECT id, status, data_fechamento
             FROM fatura
             WHERE cartao_id = ?
-              AND mes_referencia = ?;
+            AND mes_referencia = ?;
         """, (
             compra.cartao_id,
             mes_referencia
@@ -172,13 +177,26 @@ def inserir_compra_com_parcela(
         if registro_fatura is not None:
             fatura_id = registro_fatura[0]
             status_fatura = registro_fatura[1]
+            fechamento_fatura = registro_fatura[2]
 
             if status_fatura != "ABERTA":
                 raise ValueError(
-                    "A fatura correspondente está fechada."
+                    "Esta compra pertence a uma fatura já fechada. "
+                    "Confira a data da compra e a fatura do cartão."
+                )
+
+            if fechamento_fatura <= date.today().isoformat():
+                raise ValueError(
+                    "Não é possível adicionar compras a uma "
+                    "fatura cuja data de fechamento já chegou."
                 )
 
         else:
+            if data_fechamento <= date.today().isoformat():
+                raise ValueError(
+                    "Não é possível criar uma fatura aberta "
+                    "com data de fechamento já atingida."
+                )
             cursor.execute("""
                 INSERT INTO fatura (
                     cartao_id,
@@ -244,7 +262,7 @@ def inserir_compra_com_parcela(
             compra.valor_total,
             data_vencimento
         ))
-        
+
         conexao.commit()
 
         compra.id = compra_id

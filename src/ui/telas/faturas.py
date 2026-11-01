@@ -3,6 +3,8 @@ import customtkinter as ctk
 from services.fatura_service import (
     listar_faturas,
     cadastrar_fatura,
+    obter_total_fatura,
+    atualizar_faturas_automaticamente,
     atualizar_fatura
 )
 
@@ -54,8 +56,10 @@ class TelaFaturas(ctk.CTkFrame):
         self.carregar_faturas()
 
     def carregar_faturas(self):
-        faturas = listar_faturas()
+        atualizar_faturas_automaticamente()
         
+        faturas = listar_faturas()
+
         cartoes = listar_cartoes()
 
         nomes_cartoes = {}
@@ -64,6 +68,16 @@ class TelaFaturas(ctk.CTkFrame):
             nomes_cartoes[cartao.id] = cartao.nome
 
         for fatura in faturas:
+
+            total_centavos = obter_total_fatura(fatura.id)
+
+            total_formatado = (
+                f"R$ {total_centavos / 100:,.2f}"
+                .replace(",", "X")
+                .replace(".", ",")
+                .replace("X", ".")
+            )
+
             linha = ctk.CTkFrame(
                 self.lista_faturas
             )
@@ -73,7 +87,7 @@ class TelaFaturas(ctk.CTkFrame):
                 pady=8,
                 fill="x"
             )
-            
+
             nome_cartao = nomes_cartoes.get(
                 fatura.cartao_id,
                 "Cartão não encontrado"
@@ -84,6 +98,7 @@ class TelaFaturas(ctk.CTkFrame):
                 f"Mês: {fatura.mes_referencia} | "
                 f"Fechamento: {fatura.data_fechamento} | "
                 f"Vencimento: {fatura.data_vencimento} | "
+                f"{total_formatado} | "
                 f"{fatura.status}"
             )
 
@@ -100,7 +115,7 @@ class TelaFaturas(ctk.CTkFrame):
                 fill="x",
                 expand=True
             )
-            
+
             botao_editar = ctk.CTkButton(
                 linha,
                 text="Editar",
@@ -113,7 +128,7 @@ class TelaFaturas(ctk.CTkFrame):
                 padx=5,
                 pady=10
             )
-            
+
             if fatura.status == "ABERTA":
                 botao_editar = ctk.CTkButton(
                     linha,
@@ -277,13 +292,13 @@ class TelaFaturas(ctk.CTkFrame):
             pady=20,
             fill="x"
         )
-            
+
     def atualizar_lista(self):
         for widget in self.lista_faturas.winfo_children():
             widget.destroy()
 
         self.carregar_faturas()
-        
+
     def abrir_edicao_fatura(self, fatura):
         janela = ctk.CTkToplevel(self)
 
@@ -377,6 +392,7 @@ class TelaFaturas(ctk.CTkFrame):
             padx=30,
             pady=(5, 0)
         )
+
         def salvar_edicao():
             mes_referencia = entrada_mes.get()
             data_fechamento = entrada_fechamento.get()

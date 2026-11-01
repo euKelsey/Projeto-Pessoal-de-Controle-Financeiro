@@ -1,11 +1,18 @@
 from models.fatura import Fatura
 from datetime import datetime
+from datetime import date
 from repositories.fatura_repository import (
     inserir,
     listar,
     buscar_por_id,
     buscar_por_cartao_mes,
+    calcular_total_fatura,
+    fechar_faturas_vencidas,
+    processar_faturas_automaticamente,
     atualizar
+)
+from repositories.fatura_repository import (
+    fechar_fatura as fechar_fatura_repository
 )
 from repositories.cartao_repository import buscar_por_id as buscar_cartao_por_id
 
@@ -138,3 +145,47 @@ def atualizar_fatura(
     fatura.status = status
 
     return atualizar(fatura)
+
+def obter_total_fatura(fatura_id: int) -> int:
+    if not isinstance(fatura_id, int) or fatura_id <= 0:
+        raise ValueError("ID da fatura inválido.")
+
+    fatura = buscar_por_id(fatura_id)
+
+    if fatura is None:
+        raise ValueError("Fatura não encontrada.")
+
+    return calcular_total_fatura(fatura_id)
+
+def confirmar_fechamento_fatura(fatura_id: int):
+    if not isinstance(fatura_id, int) or fatura_id <= 0:
+        raise ValueError("ID da fatura inválido.")
+
+    fatura = buscar_por_id(fatura_id)
+
+    if fatura is None:
+        raise ValueError("Fatura não encontrada.")
+
+    if fatura.status != "ABERTA":
+        raise ValueError("Esta fatura já está fechada.")
+
+    fechou = fechar_fatura_repository(fatura_id)
+
+    if not fechou:
+        raise ValueError(
+            "Não foi possível fechar a fatura."
+        )
+
+    return True
+
+def atualizar_faturas_automaticamente(
+    data_referencia: str | None = None
+) -> int:
+    if data_referencia is None:
+        data_referencia = date.today().isoformat()
+
+    quantidade_fechada, quantidade_lancamentos = (
+        processar_faturas_automaticamente(data_referencia)
+    )
+
+    return quantidade_fechada

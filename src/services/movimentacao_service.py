@@ -36,6 +36,13 @@ def cadastrar_movimentacao(
 
     if valor <= 0:
         raise ValueError("O valor da movimentação deve ser maior que zero.")
+    
+    if lancamento.origem == "FATURA":
+        if valor != lancamento.valor_previsto:
+            raise ValueError(
+                "O pagamento da fatura deve ser integral. "
+                "Informe exatamente o valor total da fatura."
+            )
 
     formas_validas = (
         "PIX",
