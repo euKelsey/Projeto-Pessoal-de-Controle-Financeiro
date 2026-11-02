@@ -99,15 +99,9 @@ class TelaLancamentos(ctk.CTkFrame):
                 expand=True
             )
 
+
             if lancamento.status == "PENDENTE":
-                botao_editar = ctk.CTkButton(
-                    linha,
-                    text="Editar",
-                    width=80,
-                    command=lambda l=lancamento: self.abrir_edicao_lancamento(
-                        l)
-                )
-                
+
                 texto_botao = (
                     "Receber"
                     if lancamento.tipo == "RECEITA"
@@ -127,25 +121,34 @@ class TelaLancamentos(ctk.CTkFrame):
                     pady=10
                 )
 
-                botao_editar.pack(
-                    side="right",
-                    padx=5,
-                    pady=10
-                )
+                if lancamento.origem != "FATURA":
 
-                botao_cancelar = ctk.CTkButton(
-                    linha,
-                    text="Cancelar",
-                    width=90,
-                    command=lambda l=lancamento: self.cancelar_lancamento_interface(
-                        l)
-                )
+                    botao_editar = ctk.CTkButton(
+                        linha,
+                        text="Editar",
+                        width=80,
+                        command=lambda l=lancamento: self.abrir_edicao_lancamento(l)
+                    )
 
-                botao_cancelar.pack(
-                    side="right",
-                    padx=5,
-                    pady=10
-                )
+                    botao_editar.pack(
+                        side="right",
+                        padx=5,
+                        pady=10
+                    )
+
+                    botao_cancelar = ctk.CTkButton(
+                        linha,
+                        text="Cancelar",
+                        width=90,
+                        command=lambda l=lancamento: self.cancelar_lancamento_interface(l)
+                    )
+
+                    botao_cancelar.pack(
+                        side="right",
+                        padx=5,
+                        pady=10
+                    )
+
 
     def cancelar_lancamento_interface(self, lancamento):
         try:

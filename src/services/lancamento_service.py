@@ -68,7 +68,13 @@ def atualizar_lancamento(
 
     if lancamento is None:
         raise ValueError("Lançamento não encontrado.")
-
+    
+    if lancamento.origem == "FATURA":
+        raise ValueError(
+            "Lançamentos de faturas não podem ser editados "
+            "manualmente."
+        )
+        
     tipo = tipo.strip().upper()
     descricao = descricao.strip()
     status = status.strip().upper()
@@ -105,6 +111,14 @@ def cancelar_lancamento(lancamento_id: int):
 
     if lancamento is None:
         raise ValueError("Lançamento não encontrado.")
+    
+    
+    if lancamento.origem == "FATURA":
+        raise ValueError(
+            "Lançamentos de faturas não podem ser "
+            "cancelados manualmente."
+        )
+
 
     cancelar(lancamento_id)
 

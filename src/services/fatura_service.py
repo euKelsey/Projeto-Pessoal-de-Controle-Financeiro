@@ -16,6 +16,18 @@ from repositories.fatura_repository import (
 )
 from repositories.cartao_repository import buscar_por_id as buscar_cartao_por_id
 
+from repositories.lancamento_repository import (
+    buscar_por_fatura_id
+)
+
+from repositories.movimentacao_repository import (
+    buscar_por_lancamento_id
+)
+
+from services.movimentacao_service import (
+    cadastrar_movimentacao
+)
+
 def validar_datas_fatura(
     mes_referencia: str,
     data_fechamento: str,
@@ -189,3 +201,79 @@ def atualizar_faturas_automaticamente(
     )
 
     return quantidade_fechada
+
+
+def pagar_fatura(
+    fatura_id: int,
+    data_pagamento: str,
+    forma: str,
+    observacao: str | None = None
+):
+    # 1. Validar o ID da fatura.
+    if not isinstance(fatura_id, int) or fatura_id <= 0:
+        raise ValueError("ID da fatura inválido.")
+
+    # 2. Localizar a fatura.
+    fatura = buscar_por_id(fatura_id)
+
+    if fatura is None:
+        raise ValueError("Fatura não encontrada.")
+
+    # 3. Verificar se está fechada.
+    if fatura.status != "FECHADA":
+        raise ValueError(
+            "Somente faturas fechadas podem ser pagas."
+        )
+
+    # 4. Localizar o lançamento financeiro.
+    lancamento = buscar_por_fatura_id(fatura_id)
+
+    if lancamento is None:
+        raise ValueError(
+            "Esta fatura não possui lançamento financeiro."
+        )
+
+    if lancamento.origem != "FATURA":
+        raise ValueError(
+            "O lançamento não pertence a uma fatura."
+        )
+
+    # 5. Verificar se o lançamento está pendente.
+    if lancamento.status != "PENDENTE":
+        raise ValueError(
+            "Esta fatura não possui pagamento pendente."
+        )
+
+    # 6. Impedir pagamento duplicado.
+    movimentacao_existente = buscar_por_lancamento_id(
+        lancamento.id
+    )
+
+    if movimentacao_existente is not None:
+        raise ValueError(
+            "Esta fatura já possui um pagamento registrado."
+        )
+
+    # 7. Validar a data informada.
+    try:
+        data_validada = datetime.strptime(
+            data_pagamento, "%Y-%m-%d"
+        )
+
+        if data_validada.strftime("%Y-%m-%d") != data_pagamento:
+            raise ValueError()
+
+    except ValueError:
+        raise ValueError(
+            "Informe uma data válida no formato AAAA-MM-DD."
+        )
+
+    # 8. Registrar o pagamento integral.
+    return cadastrar_movimentacao(
+        lancamento_id=lancamento.id,
+        valor=lancamento.valor_previsto,
+        data_movimentacao=data_pagamento,
+        forma=forma,
+        observacao=observacao
+    )
+

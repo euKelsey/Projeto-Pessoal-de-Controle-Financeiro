@@ -10,20 +10,9 @@ from services.cartao_service import (
 
 
 class TelaCartoes(ctk.CTkFrame):
+    
     def __init__(self, master):
         super().__init__(master)
-
-        self.botao_novo_cartao = ctk.CTkButton(
-            self,
-            text="Novo Cartão",
-            command=self.abrir_formulario_cartao
-        )
-
-        self.botao_novo_cartao.pack(
-            padx=30,
-            pady=(0, 20),
-            anchor="nw"
-        )
 
         self.titulo = ctk.CTkLabel(
             self,
@@ -40,6 +29,18 @@ class TelaCartoes(ctk.CTkFrame):
             anchor="nw"
         )
 
+        self.botao_novo_cartao = ctk.CTkButton(
+            self,
+            text="Novo Cartão",
+            command=self.abrir_formulario_cartao
+        )
+
+        self.botao_novo_cartao.pack(
+            padx=30,
+            pady=(0, 20),
+            anchor="nw"
+        )
+
         self.lista_cartoes = ctk.CTkScrollableFrame(
             self
         )
@@ -52,6 +53,7 @@ class TelaCartoes(ctk.CTkFrame):
         )
 
         self.carregar_cartoes()
+
 
     def carregar_cartoes(self):
         cartoes = listar_cartoes()

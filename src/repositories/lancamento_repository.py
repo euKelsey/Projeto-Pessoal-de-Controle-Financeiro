@@ -165,6 +165,53 @@ def atualizar(lancamento: Lancamento):
 
     return lancamento
 
+
+def buscar_por_fatura_id(fatura_id: int):
+    conexao = conectar()
+
+    try:
+        cursor = conexao.cursor()
+
+        cursor.execute("""
+            SELECT
+                id,
+                tipo,
+                descricao,
+                valor_previsto,
+                data_prevista,
+                categoria_id,
+                recorrencia_id,
+                fatura_id,
+                status,
+                observacao,
+                origem
+            FROM lancamento
+            WHERE fatura_id = ?;
+        """, (fatura_id,))
+
+        registro = cursor.fetchone()
+
+        if registro is None:
+            return None
+
+        return Lancamento(
+            id=registro[0],
+            tipo=registro[1],
+            descricao=registro[2],
+            valor_previsto=registro[3],
+            data_prevista=registro[4],
+            categoria_id=registro[5],
+            recorrencia_id=registro[6],
+            fatura_id=registro[7],
+            status=registro[8],
+            observacao=registro[9],
+            origem=registro[10]
+        )
+
+    finally:
+        conexao.close()
+
+
 def cancelar(lancamento_id: int):
     conexao = conectar()
     cursor = conexao.cursor()

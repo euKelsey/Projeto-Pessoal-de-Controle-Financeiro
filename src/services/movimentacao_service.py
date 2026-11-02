@@ -12,6 +12,11 @@ from repositories.movimentacao_repository import (
     atualizar,
     inserir_e_efetivar
 )
+
+from repositories.fatura_repository import (
+    buscar_por_id as buscar_fatura_por_id
+)
+
 from repositories.lancamento_repository import buscar_por_id as buscar_lancamento_por_id
 
 
@@ -37,12 +42,29 @@ def cadastrar_movimentacao(
     if valor <= 0:
         raise ValueError("O valor da movimentação deve ser maior que zero.")
     
+
     if lancamento.origem == "FATURA":
+
+        fatura = buscar_fatura_por_id(
+            lancamento.fatura_id
+        )
+
+        if fatura is None:
+            raise ValueError(
+                "Fatura associada não encontrada."
+            )
+
+        if fatura.status != "FECHADA":
+            raise ValueError(
+                "Somente faturas fechadas podem ser pagas."
+            )
+
         if valor != lancamento.valor_previsto:
             raise ValueError(
                 "O pagamento da fatura deve ser integral. "
                 "Informe exatamente o valor total da fatura."
             )
+
 
     formas_validas = (
         "PIX",
@@ -95,6 +117,23 @@ def atualizar_movimentacao(
 
     if movimentacao is None:
         raise ValueError("Movimentação não encontrada.")
+    
+    
+    lancamento = buscar_lancamento_por_id(
+        movimentacao.lancamento_id
+    )
+
+    if lancamento is None:
+        raise ValueError(
+            "Lançamento associado não encontrado."
+        )
+
+    if lancamento.origem == "FATURA":
+        raise ValueError(
+            "Pagamentos de faturas não podem ser "
+            "alterados após o registro."
+        )
+
 
     forma = forma.strip().upper()
 

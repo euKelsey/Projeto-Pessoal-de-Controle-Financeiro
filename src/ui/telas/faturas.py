@@ -1,12 +1,17 @@
 import customtkinter as ctk
+from datetime import date
+from tkinter import messagebox
 
 from services.fatura_service import (
     listar_faturas,
     cadastrar_fatura,
     obter_total_fatura,
     atualizar_faturas_automaticamente,
-    atualizar_fatura
+    atualizar_fatura,
+    pagar_fatura
 )
+
+from repositories.lancamento_repository import buscar_por_fatura_id
 
 from services.cartao_service import listar_cartoes
 
@@ -116,18 +121,6 @@ class TelaFaturas(ctk.CTkFrame):
                 expand=True
             )
 
-            botao_editar = ctk.CTkButton(
-                linha,
-                text="Editar",
-                width=80,
-                command=lambda f=fatura: self.abrir_edicao_fatura(f)
-            )
-
-            botao_editar.pack(
-                side="right",
-                padx=5,
-                pady=10
-            )
 
             if fatura.status == "ABERTA":
                 botao_editar = ctk.CTkButton(
@@ -142,6 +135,29 @@ class TelaFaturas(ctk.CTkFrame):
                     padx=5,
                     pady=10
                 )
+                
+
+            if fatura.status == "FECHADA":
+                lancamento = buscar_por_fatura_id(fatura.id)
+
+                if (
+                    lancamento is not None
+                    and lancamento.status == "PENDENTE"
+                ):
+                    botao_pagar = ctk.CTkButton(
+                        linha,
+                        text="Pagar",
+                        width=80,
+                        command=lambda f=fatura: self.abrir_pagamento_fatura(f)
+                    )
+
+                    botao_pagar.pack(
+                        side="right",
+                        padx=5,
+                        pady=10
+                    )
+
+
 
     def abrir_formulario_fatura(self):
         janela = ctk.CTkToplevel(self)
@@ -427,3 +443,128 @@ class TelaFaturas(ctk.CTkFrame):
             pady=20,
             fill="x"
         )
+        
+
+    def abrir_pagamento_fatura(self, fatura):
+        janela = ctk.CTkToplevel(self)
+        janela.title("Pagar Fatura")
+        janela.geometry("450x480")
+
+        janela.transient(self)
+        janela.grab_set()
+        janela.focus_force()
+
+        titulo = ctk.CTkLabel(
+            janela,
+            text="Pagamento de Fatura",
+            font=ctk.CTkFont(size=22, weight="bold")
+        )
+        titulo.pack(pady=(25, 15))
+
+        total_centavos = obter_total_fatura(fatura.id)
+
+        total_formatado = (
+            f"R$ {total_centavos / 100:,.2f}"
+            .replace(",", "X")
+            .replace(".", ",")
+            .replace("X", ".")
+        )
+
+        informacoes = ctk.CTkLabel(
+            janela,
+            text=(
+                f"Fatura: {fatura.mes_referencia}\n"
+                f"Valor: {total_formatado}"
+            ),
+            font=ctk.CTkFont(size=16)
+        )
+        informacoes.pack(pady=10)
+
+        entrada_data = ctk.CTkEntry(
+            janela,
+            placeholder_text="Data: AAAA-MM-DD"
+        )
+        entrada_data.insert(0, date.today().isoformat())
+        entrada_data.pack(padx=30, pady=10, fill="x")
+
+        campo_forma = ctk.CTkComboBox(
+            janela,
+            values=[
+                "PIX",
+                "DINHEIRO",
+                "DEBITO",
+                "TRANSFERENCIA",
+                "BOLETO",
+                "OUTRO"
+            ],
+            state="readonly"
+        )
+        campo_forma.set("PIX")
+        campo_forma.pack(padx=30, pady=10, fill="x")
+
+        entrada_observacao = ctk.CTkEntry(
+            janela,
+            placeholder_text="Observação (opcional)"
+        )
+        entrada_observacao.pack(
+            padx=30,
+            pady=10,
+            fill="x"
+        )
+
+        mensagem_erro = ctk.CTkLabel(
+            janela,
+            text="",
+            text_color="#FF6B6B",
+            wraplength=380
+        )
+        mensagem_erro.pack(padx=30, pady=5)
+
+        def confirmar_pagamento():
+            try:
+                pagar_fatura(
+                    fatura_id=fatura.id,
+                    data_pagamento=entrada_data.get(),
+                    forma=campo_forma.get(),
+                    observacao=entrada_observacao.get() or None
+                )
+
+                janela.destroy()
+                self.atualizar_lista()
+
+                messagebox.showinfo(
+                    "Pagamento registrado",
+                    "A fatura foi paga com sucesso."
+                )
+
+            except ValueError as erro:
+                mensagem_erro.configure(text=str(erro))
+
+            except Exception as erro:
+                mensagem_erro.configure(
+                    text=f"Erro ao registrar pagamento: {erro}"
+                )
+
+        botao_confirmar = ctk.CTkButton(
+            janela,
+            text="Confirmar Pagamento",
+            command=confirmar_pagamento
+        )
+        botao_confirmar.pack(
+            padx=30,
+            pady=(10, 5),
+            fill="x"
+        )
+
+        botao_cancelar = ctk.CTkButton(
+            janela,
+            text="Cancelar",
+            fg_color="gray40",
+            command=janela.destroy
+        )
+        botao_cancelar.pack(
+            padx=30,
+            pady=5,
+            fill="x"
+        )
+
