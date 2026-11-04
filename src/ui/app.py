@@ -2,6 +2,7 @@ import customtkinter as ctk
 from ui.telas.lancamentos import TelaLancamentos
 from ui.telas.faturas import TelaFaturas
 from ui.telas.compras_cartao import TelaComprasCartao
+from ui.telas.dashboard import TelaDashboard
 
 from ui.telas.cartoes import TelaCartoes
 
@@ -60,8 +61,10 @@ class App(ctk.CTk):
 
         self.botao_dashboard = ctk.CTkButton(
             self.menu_lateral,
-            text="Dashboard"
+            text="Dashboard",
+            command=self.mostrar_dashboard
         )
+
 
         self.botao_dashboard.pack(
             padx=20,
@@ -130,20 +133,7 @@ class App(ctk.CTk):
             fill="x"
         )
 
-        self.titulo_principal = ctk.CTkLabel(
-            self.area_principal,
-            text="Dashboard",
-            font=ctk.CTkFont(
-                size=28,
-                weight="bold"
-            )
-        )
-
-        self.titulo_principal.pack(
-            padx=30,
-            pady=30,
-            anchor="nw"
-        )
+        self.mostrar_dashboard()
 
     def limpar_area_principal(self):
         for widget in self.area_principal.winfo_children():
@@ -208,3 +198,53 @@ class App(ctk.CTk):
             fill="both",
             expand=True
         )
+        
+
+    def mostrar_dashboard(self):
+        self.limpar_area_principal()
+
+        tela = TelaDashboard(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+        
+
+    def abrir_nova_compra(self):
+        self.limpar_area_principal()
+
+        tela = TelaComprasCartao(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+        tela.abrir_formulario_compra()
+
+
+    def abrir_novo_lancamento(self, tipo):
+        if tipo not in ("RECEITA", "DESPESA"):
+            raise ValueError("Tipo de lançamento inválido.")
+
+        self.limpar_area_principal()
+
+        tela = TelaLancamentos(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+        tela.abrir_formulario_lancamento(
+            tipo_inicial=tipo
+        )
+
+

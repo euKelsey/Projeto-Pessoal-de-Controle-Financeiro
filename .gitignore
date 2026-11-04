@@ -12,3 +12,17 @@ venv/
 # Arquivos do sistema operacional
 .DS_Store
 Thumbs.db
+
+# Arquivos gerados pelo PyInstaller
+build/
+dist/
+*.spec
+
+# Backups locais
+backups/
+
+# Bancos SQLite e arquivos auxiliares
+*.db
+*.db-wal
+*.db-shm
+*.db-journal

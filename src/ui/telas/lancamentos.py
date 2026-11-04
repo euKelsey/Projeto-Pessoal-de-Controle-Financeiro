@@ -7,6 +7,8 @@ from services.lancamento_service import (
     atualizar_lancamento
 )
 
+from utils.datas import formatar_data_br, data_para_banco
+
 from services.movimentacao_service import cadastrar_movimentacao
 
 from services.categoria_service import listar_categorias_ativas
@@ -161,7 +163,7 @@ class TelaLancamentos(ctk.CTkFrame):
         except ValueError as erro:
             print(erro)
 
-    def abrir_formulario_lancamento(self):
+    def abrir_formulario_lancamento(self, tipo_inicial=None):
         janela = ctk.CTkToplevel(self)
 
         janela.title("Novo Lançamento")
@@ -209,6 +211,12 @@ class TelaLancamentos(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+        
+        # Definir o tipo inicial do lançamento
+        if tipo_inicial in ("RECEITA", "DESPESA"):
+            campo_tipo.set(tipo_inicial)
+        else:
+            campo_tipo.set("RECEITA")
 
         entrada_valor = ctk.CTkEntry(
             janela,
@@ -223,7 +231,7 @@ class TelaLancamentos(ctk.CTkFrame):
 
         entrada_data = ctk.CTkEntry(
             janela,
-            placeholder_text="Data prevista: AAAA-MM-DD"
+            placeholder_text="Data prevista: DD/MM/AAAA"
         )
 
         entrada_data.pack(
@@ -231,6 +239,30 @@ class TelaLancamentos(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+        
+
+        # Formatar automaticamente ao sair do campo
+        def formatar_campo_data(event=None):
+            texto = entrada_data.get().strip()
+
+            if not texto:
+                return
+
+            try:
+                data_formatada = formatar_data_br(texto)
+
+                entrada_data.delete(0, "end")
+                entrada_data.insert(0, data_formatada)
+
+            except ValueError:
+                # A validação será apresentada ao salvar
+                pass
+
+        entrada_data.bind(
+            "<FocusOut>",
+            formatar_campo_data
+        )
+
 
         categorias = listar_categorias_ativas()
 
@@ -310,7 +342,7 @@ class TelaLancamentos(ctk.CTkFrame):
             descricao = entrada_descricao.get()
             tipo = campo_tipo.get()
             valor_texto = entrada_valor.get()
-            data_prevista = entrada_data.get()
+            data_prevista = entrada_data.get().strip()
             categoria_selecionada = campo_categoria.get()
             observacao = entrada_observacao.get()
 
@@ -339,6 +371,8 @@ class TelaLancamentos(ctk.CTkFrame):
                         text="Selecione uma categoria válida."
                     )
                     return
+                
+                data_prevista = data_para_banco(data_prevista)
 
                 cadastrar_lancamento(
                     tipo=tipo,
