@@ -1,5 +1,6 @@
 import customtkinter as ctk
 from datetime import date
+from utils.datas import formatar_data_br, data_para_banco, vincular_formatacao_data
 
 from services.cartao_service import listar_cartoes
 
@@ -116,7 +117,7 @@ class TelaComprasCartao(ctk.CTkFrame):
                 f"{nome_cartao} | "
                 f"{nome_categoria} | "
                 f"{valor_formatado} | "
-                f"Data: {compra.data_compra} | "
+                f"Data: {formatar_data_br(compra.data_compra)} | "
                 f"1x | "
                 f"{compra.status}"
             )
@@ -267,12 +268,12 @@ class TelaComprasCartao(ctk.CTkFrame):
         # Data da compra
         entrada_data = ctk.CTkEntry(
             janela,
-            placeholder_text="Data: AAAA-MM-DD"
+            placeholder_text="Data: DD/MM/AAAA"
         )
 
         entrada_data.insert(
             0,
-            date.today().isoformat()
+            date.today().strftime('%d/%m/%Y')
         )
 
         entrada_data.pack(
@@ -280,6 +281,8 @@ class TelaComprasCartao(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+
+        vincular_formatacao_data(entrada_data)
 
         # Observação
         entrada_observacao = ctk.CTkEntry(
@@ -365,7 +368,7 @@ class TelaComprasCartao(ctk.CTkFrame):
                 valor_centavos = int(valor_reais * 100)
 
                 # 5. Obter data e observação
-                data_compra = entrada_data.get().strip()
+                data_compra = data_para_banco(entrada_data.get().strip())
                 observacao = (
                     entrada_observacao.get().strip() or None
                 )
