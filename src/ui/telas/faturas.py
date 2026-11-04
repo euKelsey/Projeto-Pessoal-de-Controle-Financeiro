@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from datetime import date
 from tkinter import messagebox
+from utils.datas import formatar_data_br, data_para_banco, vincular_formatacao_data
 
 from services.fatura_service import (
     listar_faturas,
@@ -100,9 +101,9 @@ class TelaFaturas(ctk.CTkFrame):
 
             texto = (
                 f"{nome_cartao} | "
-                f"Mês: {fatura.mes_referencia} | "
-                f"Fechamento: {fatura.data_fechamento} | "
-                f"Vencimento: {fatura.data_vencimento} | "
+                f"Mês: {fatura.mes_referencia[5:7]}/{fatura.mes_referencia[:4]} | "
+                f"Fechamento: {formatar_data_br(fatura.data_fechamento)} | "
+                f"Vencimento: {formatar_data_br(fatura.data_vencimento)} | "
                 f"{total_formatado} | "
                 f"{fatura.status}"
             )
@@ -227,7 +228,7 @@ class TelaFaturas(ctk.CTkFrame):
 
         entrada_fechamento = ctk.CTkEntry(
             janela,
-            placeholder_text="Data de fechamento: AAAA-MM-DD"
+            placeholder_text="Data de fechamento: DD/MM/AAAA"
         )
 
         entrada_fechamento.pack(
@@ -238,7 +239,7 @@ class TelaFaturas(ctk.CTkFrame):
 
         entrada_vencimento = ctk.CTkEntry(
             janela,
-            placeholder_text="Data de vencimento: AAAA-MM-DD"
+            placeholder_text="Data de vencimento: DD/MM/AAAA"
         )
 
         entrada_vencimento.pack(
@@ -246,6 +247,9 @@ class TelaFaturas(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+
+        vincular_formatacao_data(entrada_fechamento)
+        vincular_formatacao_data(entrada_vencimento)
 
         mensagem_erro = ctk.CTkLabel(
             janela,
@@ -280,6 +284,9 @@ class TelaFaturas(ctk.CTkFrame):
                         text="Selecione um cartão válido."
                     )
                     return
+
+                data_fechamento = data_para_banco(data_fechamento)
+                data_vencimento = data_para_banco(data_vencimento)
 
                 cadastrar_fatura(
                     cartao_id=cartao_encontrado.id,
@@ -356,7 +363,7 @@ class TelaFaturas(ctk.CTkFrame):
 
         entrada_fechamento.insert(
             0,
-            fatura.data_fechamento
+            formatar_data_br(fatura.data_fechamento)
         )
 
         entrada_fechamento.pack(
@@ -371,7 +378,7 @@ class TelaFaturas(ctk.CTkFrame):
 
         entrada_vencimento.insert(
             0,
-            fatura.data_vencimento
+            formatar_data_br(fatura.data_vencimento)
         )
 
         entrada_vencimento.pack(
@@ -379,6 +386,9 @@ class TelaFaturas(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+        vincular_formatacao_data(entrada_fechamento)
+        vincular_formatacao_data(entrada_vencimento)
+
         campo_status = ctk.CTkComboBox(
             janela,
             values=[
@@ -416,6 +426,9 @@ class TelaFaturas(ctk.CTkFrame):
             status = campo_status.get()
 
             try:
+                data_fechamento = data_para_banco(data_fechamento)
+                data_vencimento = data_para_banco(data_vencimento)
+
                 atualizar_fatura(
                     fatura_id=fatura.id,
                     mes_referencia=mes_referencia,
@@ -473,7 +486,7 @@ class TelaFaturas(ctk.CTkFrame):
         informacoes = ctk.CTkLabel(
             janela,
             text=(
-                f"Fatura: {fatura.mes_referencia}\n"
+                f"Fatura: {fatura.mes_referencia[5:7]}/{fatura.mes_referencia[:4]}\n"
                 f"Valor: {total_formatado}"
             ),
             font=ctk.CTkFont(size=16)
@@ -482,10 +495,11 @@ class TelaFaturas(ctk.CTkFrame):
 
         entrada_data = ctk.CTkEntry(
             janela,
-            placeholder_text="Data: AAAA-MM-DD"
+            placeholder_text="Data: DD/MM/AAAA"
         )
-        entrada_data.insert(0, date.today().isoformat())
+        entrada_data.insert(0, date.today().strftime('%d/%m/%Y'))
         entrada_data.pack(padx=30, pady=10, fill="x")
+        vincular_formatacao_data(entrada_data)
 
         campo_forma = ctk.CTkComboBox(
             janela,
@@ -524,7 +538,7 @@ class TelaFaturas(ctk.CTkFrame):
             try:
                 pagar_fatura(
                     fatura_id=fatura.id,
-                    data_pagamento=entrada_data.get(),
+                    data_pagamento=data_para_banco(entrada_data.get()),
                     forma=campo_forma.get(),
                     observacao=entrada_observacao.get() or None
                 )
