@@ -39,3 +39,23 @@ def data_para_banco(valor: str) -> str:
     )
 
     return data.strftime("%Y-%m-%d")
+
+
+def vincular_formatacao_data(campo):
+    """Formata automaticamente uma data brasileira ao sair de um CTkEntry.
+
+    Valores incompletos/invalidos permanecem para a validacao ao salvar.
+    """
+    def ao_sair(event=None):
+        texto = campo.get().strip()
+        if not texto:
+            return
+        try:
+            data_formatada = formatar_data_br(texto)
+        except (ValueError, TypeError):
+            return
+        if data_formatada != texto:
+            campo.delete(0, "end")
+            campo.insert(0, data_formatada)
+
+    campo.bind("<FocusOut>", ao_sair)
