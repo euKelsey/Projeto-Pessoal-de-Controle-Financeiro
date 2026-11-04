@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from ui.telas.lancamentos import TelaLancamentos
 from ui.telas.faturas import TelaFaturas
+from ui.telas.compras_cartao import TelaComprasCartao
 
 from ui.telas.cartoes import TelaCartoes
 
@@ -91,6 +92,19 @@ class App(ctk.CTk):
             pady=10,
             fill="x"
         )
+    
+        self.botao_compras_cartao = ctk.CTkButton(
+            self.menu_lateral,
+            text="Compras no Cartão",
+            command=self.mostrar_compras_cartao
+        )
+
+        self.botao_compras_cartao.pack(
+            padx=20,
+            pady=10,
+            fill="x"
+        )
+
 
         self.botao_categorias = ctk.CTkButton(
             self.menu_lateral,
@@ -174,6 +188,19 @@ class App(ctk.CTk):
         self.limpar_area_principal()
 
         tela = TelaFaturas(
+            self.area_principal
+        )
+
+        tela.pack(
+            fill="both",
+            expand=True
+        )
+
+
+    def mostrar_compras_cartao(self):
+        self.limpar_area_principal()
+
+        tela = TelaComprasCartao(
             self.area_principal
         )
 
