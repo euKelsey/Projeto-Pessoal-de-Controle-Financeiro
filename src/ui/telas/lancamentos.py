@@ -7,7 +7,7 @@ from services.lancamento_service import (
     atualizar_lancamento
 )
 
-from utils.datas import formatar_data_br, data_para_banco
+from utils.datas import formatar_data_br, data_para_banco, vincular_formatacao_data
 
 from services.movimentacao_service import cadastrar_movimentacao
 
@@ -83,7 +83,7 @@ class TelaLancamentos(ctk.CTkFrame):
                 f"{lancamento.tipo} | "
                 f"R$ {lancamento.valor_previsto / 100:.2f}".replace(
                     ".", ",") + " | "
-                f"{lancamento.data_prevista} | "
+                f"{formatar_data_br(lancamento.data_prevista)} | "
                 f"{lancamento.status}"
             )
 
@@ -241,27 +241,7 @@ class TelaLancamentos(ctk.CTkFrame):
         )
         
 
-        # Formatar automaticamente ao sair do campo
-        def formatar_campo_data(event=None):
-            texto = entrada_data.get().strip()
-
-            if not texto:
-                return
-
-            try:
-                data_formatada = formatar_data_br(texto)
-
-                entrada_data.delete(0, "end")
-                entrada_data.insert(0, data_formatada)
-
-            except ValueError:
-                # A validação será apresentada ao salvar
-                pass
-
-        entrada_data.bind(
-            "<FocusOut>",
-            formatar_campo_data
-        )
+        vincular_formatacao_data(entrada_data)
 
 
         categorias = listar_categorias_ativas()
@@ -484,7 +464,7 @@ class TelaLancamentos(ctk.CTkFrame):
 
         entrada_data.insert(
             0,
-            lancamento.data_prevista
+            formatar_data_br(lancamento.data_prevista)
         )
 
         entrada_data.pack(
@@ -492,6 +472,7 @@ class TelaLancamentos(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+        vincular_formatacao_data(entrada_data)
 
         categorias = listar_categorias_ativas()
 
@@ -606,6 +587,8 @@ class TelaLancamentos(ctk.CTkFrame):
                     )
                     return
 
+                data_prevista = data_para_banco(data_prevista)
+
                 atualizar_lancamento(
                     lancamento_id=lancamento.id,
                     tipo=tipo,
@@ -680,7 +663,7 @@ class TelaLancamentos(ctk.CTkFrame):
         )
         entrada_data = ctk.CTkEntry(
             janela,
-            placeholder_text="Data: AAAA-MM-DD"
+            placeholder_text="Data: DD/MM/AAAA"
         )
 
         entrada_data.pack(
@@ -688,6 +671,8 @@ class TelaLancamentos(ctk.CTkFrame):
             pady=10,
             fill="x"
         )
+        vincular_formatacao_data(entrada_data)
+
         campo_forma = ctk.CTkComboBox(
             janela,
             values=[
@@ -744,6 +729,8 @@ class TelaLancamentos(ctk.CTkFrame):
                 valor_centavos = int(
                     round(valor_reais * 100)
                 )
+
+                data = data_para_banco(data)
 
                 cadastrar_movimentacao(
                     lancamento_id=lancamento.id,
